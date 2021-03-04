@@ -1,26 +1,30 @@
 //
-//  JsonModel.swift
-//  ServerJson_01
+//  DBIdChk.swift
+//  IDRnd
 //
-//  Created by 정정이 on 2021/02/15.
+//  Created by 정정이 on 2021/03/04.
 //
 
 import Foundation
 
-protocol JsonModelProtocol: class {
-    func joinResult(result: Int)
+protocol DBIdChkProtocol: class {
+    func idResult(result: String)
 }
-class JsonModel: NSObject {
-    var delegate: JsonModelProtocol!
-    var urlPath = "http://127.0.0.1:8080/IOS/firstKorea.jsp"
+
+
+
+class DBIdChk: NSObject {
+    var delegate:DBIdChkProtocol!
+    var urlPath = "http://127.0.0.1:8080/IOS/firstKorea_IDcheck.jsp"
     
     
-    func check(id: String){
+    func check(phone: String){
         
-        let urlAdd = "?userId=\(id)"
-        print(id)
+        let urlAdd = "?userTel=\(phone)"
+//        print(id,pw)
+        print("여기 디비")
         urlPath = urlPath + urlAdd // get 방식으로 보낼 값들 달아주기
-        
+        print("여기 핸펀" + phone)
         // 한글 url encoding (한글 -> % 글씨로)
         urlPath = urlPath.addingPercentEncoding(withAllowedCharacters: CharacterSet.urlQueryAllowed)!
         
@@ -38,7 +42,7 @@ class JsonModel: NSObject {
         task.resume()
     }
     
-
+    
     /*
      json parsing 작업
      */
@@ -53,22 +57,22 @@ class JsonModel: NSObject {
         
         var jsonElement = NSDictionary()
         
-        var result = 0
+        var result = ""
         
         for i in 0..<jsonResult.count {
             jsonElement = jsonResult[i] as! NSDictionary
             print(jsonElement)
-            if let loginResult = jsonElement["result"] as? String{
+            if let idResult = jsonElement["result"] as? String{
                 print("in if let")
-                result = Int(loginResult)!
+                result = idResult
             }
             print("in for" ,result)
             
         }
         DispatchQueue.main.async(execute: {() -> Void in
-            self.delegate.joinResult(result: result)
+            self.delegate.idResult(result: result)
+            print(result)
         })
     }
     
-}//--------
-
+}//-----
