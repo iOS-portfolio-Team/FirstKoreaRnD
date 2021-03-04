@@ -30,12 +30,33 @@ class FoodJsonModel: NSObject{
         task.resume()
     }
     
+    
+    func searchItems(input: String){
+        var urlSearch = "http://127.0.0.1:8080/JSP/food_store_search.jsp?searchText=\(input)"
+        print("urlSearch = \(urlSearch)")
+        
+        // 한글 url encoding (한글 -> % 글씨로)
+        urlSearch = urlSearch.addingPercentEncoding(withAllowedCharacters: CharacterSet.urlQueryAllowed)!
+        
+        let url = URL(string: urlSearch)!
+        let defaultSession = Foundation.URLSession(configuration: URLSessionConfiguration.default)
+        
+        let task = defaultSession.dataTask(with: url){(data, response, error) in
+            if error != nil{
+                print("Failed to download data")
+            }else{
+                print("Data is downloading")
+                self.parseJSON(data!)
+            }
+        }
+        task.resume()
+    }
+    
     /*
      json parsing 작업
      */
     func parseJSON(_ data: Data){
         var jsonResult = NSArray()
-        print(jsonResult)
         do{
             jsonResult = try JSONSerialization.jsonObject(with: data, options: JSONSerialization.ReadingOptions.allowFragments) as! NSArray // json model 탈피
         }catch let error as NSError{
@@ -61,7 +82,7 @@ class FoodJsonModel: NSObject{
                 
                 let query = FoodDBModel(storeSeqNo: Int(getstoreSeqNo), storeName: getstoreName, storeScore: Double(getstoreScore), storeCategory: getstoreCategory, priceRange: getpriceRange, storeAddress: getstoreAddress, storeImage: getstoreImage)
                 locations.add(query)
-                print(getstoreSeqNo, getstoreName, getstoreScore, getstoreCategory, getpriceRange, getstoreAddress, getstoreImage)
+//                print(getstoreSeqNo, getstoreName, getstoreScore, getstoreCategory, getpriceRange, getstoreAddress, getstoreImage)
             }
 //            locations.add(query)
         } // for End.

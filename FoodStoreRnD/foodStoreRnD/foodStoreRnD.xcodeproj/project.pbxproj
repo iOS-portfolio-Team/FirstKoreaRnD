@@ -64,6 +64,7 @@
 			children = (
 				32CBAFB025EF79F700E79620 /* AppDelegate.swift */,
 				32CBAFB225EF79F700E79620 /* SceneDelegate.swift */,
+				32EC99BB25F082AD009BD788 /* FoodViewController.swift */,
 				32CBAFD525EF816700E79620 /* FoodTableViewCell.swift */,
 				32CBAFCD25EF801200E79620 /* FoodDBModel.swift */,
 				32CBAFD025EF802400E79620 /* FoodJsonModel.swift */,
@@ -71,7 +72,6 @@
 				32CBAFB925EF79FA00E79620 /* Assets.xcassets */,
 				32CBAFBB25EF79FA00E79620 /* LaunchScreen.storyboard */,
 				32CBAFBE25EF79FA00E79620 /* Info.plist */,
-				32EC99BB25F082AD009BD788 /* FoodViewController.swift */,
 			);
 			path = foodStoreRnD;
 			sourceTree = "<group>";

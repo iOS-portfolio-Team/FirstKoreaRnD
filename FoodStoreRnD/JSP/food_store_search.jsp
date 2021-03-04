@@ -11,7 +11,7 @@
 	String url_mysql = "jdbc:mysql://database-2.cotrd7tmeavd.ap-northeast-2.rds.amazonaws.com/firstkorea?serverTimezone=UTC&characterEncoding=utf8&useSSL=FALSE";
  	String id_mysql = "root";
  	String pw_mysql = "qwer1234";
-    String WhereDefault = "select storeSeqNo, storeName, storeScore, storeCategory, priceRange, storeAddress, storeImage from foodstore order by storeScore desc limit 5";
+    String WhereDefault = "select storeSeqNo, storeName, storeScore, storeCategory, priceRange, storeAddress, storeImage, (log(1 + ((select count(*) from foodstore) - (select count(*) from foodstore where storeReview like '%" + searchText + "%') + 0.5) / ((select count(*) from foodstore where storeReview like '%" + searchText + "%') + 0.5))) * (char_length(storeReview)-char_length(replace(storeReview,'" + searchText + "',''))) * (1.2 + 1) / (char_length(storeReview)-char_length(replace(storeReview,'" + searchText + "','')) + 1.2 * (1 - 0.75 + (0.75 * char_length(storeReview)) / (select avg(char_length(storeReview)) from foodstore ))) as bm25result from foodstore order by bm25result desc limit 5";
     int count = 0;
     
     try {
