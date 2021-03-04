@@ -23,11 +23,15 @@ select avg(char_length(storeReview)) from foodstore;
 select storeSeqNo, char_length(storeReview) as fieldLength from foodstore;
 
 
-select storeSeqNo, 
+# bm25
+select storeSeqNo, storeName, storeScore, storeCategory, priceRange, storeAddress, storeImage, 
+(log(1 + ((select count(*) from foodstore) - (select count(*) from foodstore where storeReview like '%스시%') + 0.5) / ((select count(*) from foodstore where storeReview like '%스시%') + 0.5))) *
 (char_length(storeReview)-char_length(replace(storeReview,'스시',''))) * (1.2 + 1)
 /
 (char_length(storeReview)-char_length(replace(storeReview,'스시','')) + 1.2 *
 (1 - 0.75 + (0.75 * char_length(storeReview)) / (select avg(char_length(storeReview)) from foodstore ))
-)
-from foodstore;
+) as bm25result
 
+from foodstore order by bm25result desc limit 5;
+
+select 1.4733057381095203 * 2.18518;

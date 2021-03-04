@@ -10,6 +10,8 @@ import Foundation
 
 class FoodDBModel: NSObject{
     
+    
+    
     // Properties
     var storeSeqNo: Int?
     var storeName: String?
@@ -18,6 +20,7 @@ class FoodDBModel: NSObject{
     var priceRange: String?
     var storeAddress: String?
     var storeImage: String?
+    
     var storeTel: String?
     var storeMenu: String?
     var storeReview: String?
@@ -27,6 +30,15 @@ class FoodDBModel: NSObject{
         
     }
     
+    init(storeSeqNo: Int? = nil, storeName: String? = nil, storeScore: Double? = nil, storeCategory: String? = nil, priceRange: String? = nil, storeAddress: String? = nil, storeImage: String? = nil) {
+        self.storeSeqNo = storeSeqNo
+        self.storeName = storeName
+        self.storeScore = storeScore
+        self.storeCategory = storeCategory
+        self.priceRange = priceRange
+        self.storeAddress = storeAddress
+        self.storeImage = storeImage
+    }
     
     
     
