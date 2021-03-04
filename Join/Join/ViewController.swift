@@ -7,9 +7,13 @@
 
 import UIKit
 
-class ViewController: UIViewController {
+class ViewController: UIViewController ,UITextFieldDelegate, JsonModelProtocol{
+  
+    
+  
 
     
+    @IBOutlet weak var myView: UIView!
     
     @IBOutlet weak var tfEmail: UITextField!
     @IBOutlet weak var tfPw: UITextField!
@@ -17,20 +21,27 @@ class ViewController: UIViewController {
     @IBOutlet weak var tfPhone: UITextField!
     @IBOutlet weak var btnInsert: UIButton!
     @IBOutlet weak var labelPwChk: UILabel!
+    @IBOutlet weak var labelEmail: UILabel!
     @IBOutlet weak var labelPhoneChk: UILabel!
     let defaultColor = #colorLiteral(red: 0.3730975389, green: 0.6497389078, blue: 1, alpha: 1)
     var chk = 0
     var chk2 = 0
     var feedItem: NSArray = NSArray()
+    var emailCheck = false
+    var pwCheck = false
+    var telCheck = false
+    var idCheck = 0
 
-    var keyHeight: CGFloat?
 
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
         
-        
-        
+        //비번 글자수 delegate
+        tfPw.delegate = self
+        tfPwChk.delegate = self
+        //핸드폰번호 글자수 delegate
+        tfPhone.delegate = self
         //텍스트 필드 밑줄
         tfEmail.borderStyle = .none // 보더값 없애주기
           let border = CALayer()
@@ -64,23 +75,37 @@ class ViewController: UIViewController {
         // 버튼 라운드
         btnInsert.layer.masksToBounds = true
         btnInsert.layer.cornerRadius = 15
+        
+        // tf에 아무것도 입력안했을 시 버튼 비활성화
         btnInsert.backgroundColor = UIColor.gray
         btnInsert.isEnabled = false
         
    
-        
+        setKeyboardEvent()
        
     }//---
 
     
-   
+    // 비밀번호 maxLength ,
+    func checkMaxLength(textField: UITextField!, maxLength: Int) {
+        if (tfPw.text?.count ?? 13 > maxLength) {
+            tfPw.deleteBackward()
+        }
+        if (tfPwChk.text?.count ?? 13 > maxLength) {
+            tfPwChk.deleteBackward()
+        }
+        if tfPhone.text?.count ?? 11 > maxLength {
+            tfPhone.deleteBackward()
+        }
+    }
+
     
      // 비밀번호 입력시 바로 체크
     @IBAction func tfPw(_ sender: UITextField) {
       
       pwChk()
-        btnNil()
-        
+     
+        checkMaxLength(textField: tfPw, maxLength: 13)
         
     }//---
     
@@ -91,37 +116,67 @@ class ViewController: UIViewController {
     // 비밀번호 확인 입력시 바로 체크
     @IBAction func tfPwChk(_ sender: UITextField) {
         pwChk()
-        btnNil()
+       
+        checkMaxLength(textField: tfPwChk, maxLength: 13)
     }//---
     
     
     
     // 이메일 입력시 바로 체크
     @IBAction func tfEmail(_ sender: UITextField) {
-        btnNil()
+    
+        let inputId = tfEmail.text!.trimmingCharacters(in: .whitespacesAndNewlines)
+      
+        
+        
+        if isValidEmail(testStr: inputId){
+            let jsonModel = JsonModel()
+            jsonModel.delegate = self
+            jsonModel.check(id: inputId)
+            
+        }else{
+            labelEmail.text = "이메일 형식이 아닙니다."
+            labelEmail.textColor = UIColor.red
+            emailCheck = false
+        }
+       print("email : \(emailCheck),\(telCheck),\(pwCheck)")
+
     }//---
     
     
     
     // 전화번호 입력시 바로 체크
     @IBAction func tfPhone(_ sender: UITextField) {
-        btnNil()
-        
-        
-        if tfPhone.text?.count == 3||tfPhone.text?.count == 8{
-            tfPhone.text? += "-"
     
-            
+        checkMaxLength(textField: tfPhone, maxLength: 11)
+       
+        if tfPhone.text!.count > 3{
+            let startIndex: String.Index = (tfPhone.text?.index(tfPhone.text!.startIndex,offsetBy: 2))!
+            if String(tfPhone.text![...startIndex]) != "010"{
+                labelPhoneChk.text = "올바른 핸드폰 번호가 아닙니다."
+                labelPhoneChk.textColor = UIColor.red
+                telCheck = false
+            }else if tfPhone.text!.count == 11{
+                labelPhoneChk.text = "올바른 핸드폰 번호입니다."
+                labelPhoneChk.textColor = UIColor.blue
+                telCheck = true
+
+            }else{
+                labelPhoneChk.text = "올바른 핸드폰 번호가 아닙니다."
+                labelPhoneChk.textColor = UIColor.red
+                telCheck = false
+            }
         }
-        if tfPhone.text!.count > 13{
-            labelPhoneChk.text = "올바른 핸드폰 번호가 아닙니다."
-            labelPhoneChk.textColor = UIColor.red
-            
-        }else if tfPhone.text!.count == 13{
-            labelPhoneChk.text = "올바른 핸드폰 번호입니다."
-            labelPhoneChk.textColor = UIColor.blue
+        
+        print("email : \(emailCheck),\(telCheck),\(pwCheck)")
+        if pwCheck&&emailCheck&&telCheck{
+            btnInsert.isEnabled = true
+            btnInsert.backgroundColor = defaultColor
+        }else{
+            btnInsert.isEnabled = false
+            btnInsert.backgroundColor = UIColor.gray
         }
-     
+        
     }//---
     
     
@@ -131,9 +186,12 @@ class ViewController: UIViewController {
         if tfPw.text == tfPwChk.text && tfPw.text!.count > 7 && tfPwChk.text!.count > 7{
             labelPwChk.text = "비밀번호가 일치합니다."
             labelPwChk.textColor = UIColor.blue
+            pwCheck = true
+            
         }else{
             labelPwChk.text = "비밀번호가 일치하지 않습니다."
             labelPwChk.textColor = UIColor.red
+            pwCheck = false
         }
             
         if  tfPw.text!.count <= 8 && tfPwChk.text!.count <= 8{
@@ -142,11 +200,25 @@ class ViewController: UIViewController {
             labelPwChk.text = "8글자 이상 입력해 주세요."
             labelPwChk.textColor = UIColor.red
         }
-       
+        print("email : \(emailCheck),\(telCheck),\(pwCheck)")
+        if pwCheck&&emailCheck&&telCheck{
+            btnInsert.isEnabled = true
+            btnInsert.backgroundColor = defaultColor
+        }else{
+            btnInsert.isEnabled = false
+            btnInsert.backgroundColor = UIColor.gray
+        }
     }//---
     
     
     
+    
+    //이메일 정규식
+    func isValidEmail(testStr:String) -> Bool {
+           let emailRegEx = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,64}"
+           let emailTest = NSPredicate(format:"SELF MATCHES %@", emailRegEx)
+           return emailTest.evaluate(with: testStr)
+    }//-----
  
 
     // 비밀번호 Show btn
@@ -206,61 +278,50 @@ class ViewController: UIViewController {
     }//---
     
     
-    
- 
-    
-    
-    // 회원가입 버튼 활성화
-    func btnNil()  {
-        if tfEmail.text?.count != 0 && tfPw.text?.count != 0 && tfPhone.text?.count != 0 &&
-            tfPwChk.text?.count != 0{
-            btnInsert.isEnabled = true
-            btnInsert.backgroundColor = defaultColor
-            
-        }
-    }//---
-    
-    
     // 키보드 없애기
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         self.view.endEditing(true)
     }
     
-//
-//    @objc func keyboardWillShow(_ sender: Notification) {
-//        let userInfo:NSDictionary = sender.userInfo! as NSDictionary
-//        let keyboardFrame:NSValue = userInfo.value(forKey: UIResponder.keyboardFrameEndUserInfoKey) as! NSValue
-//        let keyboardRectangle = keyboardFrame.cgRectValue
-//        let keyboardHeight = keyboardRectangle.height
-//        keyHeight = keyboardHeight
-//
-//        self.view.frame.size.height -= keyboardHeight
-//    }
-//
-//
-//    @objc func keyboardWillHide(_ sender: Notification) {
-//
-//        self.view.frame.size.height += keyHeight!
-//    }
-//
-//    func setKeyboardEvent() {
-//        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillAppear(_:)), name: UIResponder.keyboardWillShowNotification, object: nil)
-//                NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillDisappear(_:)), name: UIResponder.keyboardWillHideNotification, object: nil)
-//    }
-//
-//    @objc func keyboardWillAppear(_ sender: NotificationCenter){
-//        self.myView.frame.origin.y -= 150
-////
-//
-//    }
-//    @objc func keyboardWillDisappear(_ sender: NotificationCenter){
-//        self.myView.frame.origin.y += 200
-////        if self.vimyViewew.frame.origin.y == 100 {
-////            self.view.frame.origin.y += 200
-////        }
-//
-//    }
-//
+
+    func joinResult(result: Int) {
+        switch result {
+        case 1:
+            labelEmail.text = "중복된 이메일 입니다."
+            labelEmail.textColor = UIColor.red
+            emailCheck = false
+            
+        default:
+            labelEmail.text = "사용가능한 이메일 입니다."
+            labelEmail.textColor = UIColor.blue
+            emailCheck = true
+        }
+        print("email : \(emailCheck),\(telCheck),\(pwCheck)")
+        if pwCheck&&emailCheck&&telCheck{
+            btnInsert.isEnabled = true
+            btnInsert.backgroundColor = defaultColor
+        }else{
+            btnInsert.isEnabled = false
+            btnInsert.backgroundColor = UIColor.gray
+        }
+    }
+    
+    
+    
+    // 텍스트필드 화면 위로 올라가게.
+    func setKeyboardEvent() {
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillAppear(_:)), name: UIResponder.keyboardWillShowNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillDisappear(_:)), name: UIResponder.keyboardWillHideNotification, object: nil)
+    }
+    
+    @objc func keyboardWillAppear(_ sender: NotificationCenter){
+        self.myView.frame.origin.y -= 150
+        
+    }
+    @objc func keyboardWillDisappear(_ sender: NotificationCenter){
+        self.myView.frame.origin.y += 150
+        
+    }
     
 }//---end---
 
